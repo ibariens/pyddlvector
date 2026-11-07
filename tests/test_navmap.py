@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import struct
 import zlib
+from io import BytesIO
 from types import SimpleNamespace
+
+from PIL import Image
 
 from pyddlvector.navmap import NavMapFrame, extract_nav_map_frame, nav_map_robot_pose_from_state
 
@@ -39,6 +42,12 @@ def test_extract_nav_map_frame_returns_png_image() -> None:
     assert _pixel(pixels, width, 1, 0) == (212, 224, 231)
     assert _pixel(pixels, width, 0, 1) == (24, 28, 35)
     assert _pixel(pixels, width, 1, 1) == (250, 191, 87)
+
+    with Image.open(BytesIO(frame.data)) as image:
+        assert image.format == "PNG"
+        assert image.mode == "RGB"
+        assert image.size == (width, height)
+        assert image.tobytes() == pixels
 
 
 def test_extract_nav_map_frame_rejects_invalid_payload() -> None:
